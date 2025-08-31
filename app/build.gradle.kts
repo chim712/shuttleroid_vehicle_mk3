@@ -32,6 +32,9 @@ android {
 }
 
 dependencies {
+    val room = "2.7.2"
+    implementation("androidx.room:room-runtime:$room")
+    annotationProcessor("androidx.room:room-compiler:$room")
 
     implementation(libs.appcompat)
     implementation(libs.material)
