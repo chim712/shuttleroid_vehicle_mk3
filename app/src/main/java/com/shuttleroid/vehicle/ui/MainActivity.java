@@ -1,4 +1,4 @@
-package com.shuttleroid.vehicle.ui.main;
+package com.shuttleroid.vehicle.ui;
 
 import android.os.Bundle;
 
