@@ -1,4 +1,56 @@
 package com.shuttleroid.vehicle.ui.update;
 
-public class UpdateFragment {
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.shuttleroid.vehicle.R;
+
+public class UpdateFragment extends Fragment {
+
+    public interface OnGoToOperationListener {
+        void onGoToOperation();
+    }
+
+    private OnGoToOperationListener listener;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof OnGoToOperationListener) {
+            listener = (OnGoToOperationListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnGoToOperationListener");
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_update, container, false);
+        Button btnGoToOperation = view.findViewById(R.id.btnGoToOperation);
+        btnGoToOperation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onGoToOperation();
+                }
+            }
+        });
+        return view;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
 }
