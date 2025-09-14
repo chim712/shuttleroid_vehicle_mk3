@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.shuttleroid.vehicle.R;
+import com.shuttleroid.vehicle.data.repository.IntegratedRepository;
+import com.shuttleroid.vehicle.service.SyncManager;
 
 public class UpdateFragment extends Fragment {
 
@@ -41,6 +43,7 @@ public class UpdateFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
+                    SyncManager.getInstance(getContext()).updateRequest(101);
                     listener.onGoToOperation();
                 }
             }

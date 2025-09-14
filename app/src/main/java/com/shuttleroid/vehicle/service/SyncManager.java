@@ -1,4 +1,64 @@
 package com.shuttleroid.vehicle.service;
 
+import android.content.Context;
+import android.util.Log;
+
+import com.shuttleroid.vehicle.data.dto.DataInfoDto;
+import com.shuttleroid.vehicle.data.repository.IntegratedRepository;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+/**
+ * 서버와의 데이터 동기화를 전담하는 클래스
+ * - Retrofit으로 서버에 요청을 보내고
+ * - 응답받은 DTO를 Repository에 전달하여 DB를 갱신함
+ */
 public class SyncManager {
+    private static volatile SyncManager instance;
+    private final ApiService apiService;
+    private final IntegratedRepository repository;
+
+    private SyncManager(Context context) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://host.imagine.io.kr/") // TODO: 실제 서버 주소
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiService = retrofit.create(ApiService.class);
+        repository = IntegratedRepository.getInstance(context);
+    }
+
+    // 싱글턴 인스턴스 획득
+    public static SyncManager getInstance(Context context) {
+        if (instance == null) {
+            synchronized (SyncManager.class) {
+                if (instance == null) {
+                    instance = new SyncManager(context);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public void updateRequest(long orgID) {
+        apiService.getUpdateData(orgID).enqueue(new Callback<DataInfoDto>() {
+            @Override
+            public void onResponse(Call<DataInfoDto> call, Response<DataInfoDto> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    repository.replaceAllFromDto(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DataInfoDto> call, Throwable t) {
+                //Todo: Failure process
+
+                Log.e("SyncManager", "onFailure: " + t.getMessage());
+            }
+        });
+    }
 }
