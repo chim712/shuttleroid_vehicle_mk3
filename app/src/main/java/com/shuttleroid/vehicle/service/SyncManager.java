@@ -24,7 +24,7 @@ public class SyncManager {
 
     private SyncManager(Context context) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://host.imagine.io.kr/") // TODO: 실제 서버 주소
+                .baseUrl("http://host.imagine.io.kr/") // TODO: 실제 서버 주소
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -45,9 +45,11 @@ public class SyncManager {
     }
 
     public void updateRequest(long orgID) {
+        Log.d("SyncManager", "updateRequest");
         apiService.getUpdateData(orgID).enqueue(new Callback<DataInfoDto>() {
             @Override
             public void onResponse(Call<DataInfoDto> call, Response<DataInfoDto> response) {
+                Log.d("SyncManager","onResponse");
                 if (response.isSuccessful() && response.body() != null) {
                     repository.replaceAllFromDto(response.body());
                 }

@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.shuttleroid.vehicle.R;
+import com.shuttleroid.vehicle.data.dao.IntegratedDao;
+import com.shuttleroid.vehicle.data.database.AppDatabase;
 import com.shuttleroid.vehicle.service.AnnounceManager;
 import com.shuttleroid.vehicle.ui.login.LoginFragment;
 import com.shuttleroid.vehicle.ui.operation.OperationFragment;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity
         if(savedInstanceState == null){ // App Start
             showLoginFragment();
         }
+        AppDatabase appDatabase = AppDatabase.getInstance(this);
         AnnounceManager am = AnnounceManager.getInstance(this);
         //am.startAnnouncement("현재 정류장", "다음 정류장");
 
