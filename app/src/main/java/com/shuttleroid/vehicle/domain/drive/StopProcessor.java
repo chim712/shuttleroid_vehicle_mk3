@@ -8,6 +8,20 @@ public class StopProcessor {
 
 
 
+    public static void updateLocation(){
+        // TODO: get location from gps + remain distance calculate
+    }
+    private static void onApproach(){
+        //TODO: send server + announce
+    }
+    private static void onArrive(){
+        //TODO: send server + route end check
+    }
+    private static void onLeave(){
+        //TODO: send server + change stop (terminal stop check)
+    }
+
+
 
     // Haversine formula
     private static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

@@ -8,6 +8,13 @@ import android.content.Context;
 public class CourseProcessor {
 
 
+    public static void setRoute(){
+
+    }
+    public static void setDepartTime(){
+
+    }
+
     public static void handleRouteEnd(Context context){
 
     }
