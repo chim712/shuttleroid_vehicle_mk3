@@ -19,34 +19,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class SyncManager {
     private static volatile SyncManager instance;
-    private final ApiService apiService;
+    private final SyncService syncService;
     private final IntegratedRepository repository;
 
-    private SyncManager(Context context) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://host.imagine.io.kr/") // TODO: 실제 서버 주소
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        apiService = retrofit.create(ApiService.class);
-        repository = IntegratedRepository.getInstance(context);
-    }
-
-    // 싱글턴 인스턴스 획득
-    public static SyncManager getInstance(Context context) {
-        if (instance == null) {
-            synchronized (SyncManager.class) {
-                if (instance == null) {
-                    instance = new SyncManager(context);
-                }
-            }
-        }
-        return instance;
-    }
+    // Manage Logic ==================================================
 
     public void updateRequest(long orgID) {
         Log.d("SyncManager", "updateRequest");
-        apiService.getUpdateData(orgID).enqueue(new Callback<DataInfoDto>() {
+        syncService.getUpdateData(orgID).enqueue(new Callback<DataInfoDto>() {
             @Override
             public void onResponse(Call<DataInfoDto> call, Response<DataInfoDto> response) {
                 Log.d("SyncManager","onResponse");
@@ -62,5 +42,38 @@ public class SyncManager {
                 Log.e("SyncManager", "onFailure: " + t.getMessage());
             }
         });
+    }
+
+
+
+
+
+
+
+
+
+
+
+    // Singleton Constructor =======================================
+    private SyncManager(Context context) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://host.imagine.io.kr/") // TODO: 실제 서버 주소
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        syncService = retrofit.create(SyncService.class);
+        repository = IntegratedRepository.getInstance(context);
+    }
+
+    // 싱글턴 인스턴스 획득
+    public static SyncManager getInstance(Context context) {
+        if (instance == null) {
+            synchronized (SyncManager.class) {
+                if (instance == null) {
+                    instance = new SyncManager(context);
+                }
+            }
+        }
+        return instance;
     }
 }

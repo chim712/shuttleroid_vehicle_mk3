@@ -1,12 +1,16 @@
 package com.shuttleroid.vehicle.domain.drive;
 
+// Location Update and Calculate
+// BusStop Status Update
+
+// Static Util Class
 public class StopProcessor {
 
 
 
 
     // Haversine formula
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    private static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371000; // meters
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
