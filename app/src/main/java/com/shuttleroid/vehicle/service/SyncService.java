@@ -1,8 +1,10 @@
 package com.shuttleroid.vehicle.service;
 
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
+import com.shuttleroid.vehicle.data.dto.LocationReportDto;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -23,6 +25,10 @@ public interface SyncService {
     // => example.com/update?orgID=123456
 
     //TODO: @POST("location")       : 차량 위치 전송
+    // Temp Post Logic
+    @POST("ingest")
+    Call<Void> sendLocationReport(@Body LocationReportDto report);
+
 
     //TODO: @POST("route/start")    : 노선 운행 시작
     //TODO: @POST("route/end")      : 노선 운행 종료

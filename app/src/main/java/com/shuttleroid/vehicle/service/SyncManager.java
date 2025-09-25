@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
+import com.shuttleroid.vehicle.data.dto.LocationReportDto;
 import com.shuttleroid.vehicle.data.repository.IntegratedRepository;
 
 import retrofit2.Call;
@@ -39,12 +40,24 @@ public class SyncManager {
             public void onFailure(Call<DataInfoDto> call, Throwable t) {
                 //Todo: Failure process
 
-                Log.e("SyncManager", "onFailure: " + t.getMessage());
+                Log.e("Sync_Update", "onFailure: " + t.getMessage());
             }
         });
     }
 
+    public void sendLocationReport(String vehicleNo, String route, String stopLocation){
+        syncService.sendLocationReport(new LocationReportDto(vehicleNo, route, stopLocation)).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response){
+                //Todo: Success process
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t){
 
+                Log.e("Sync_Location", "onFailure: " + t.getMessage());
+            }
+        });
+    }
 
 
 

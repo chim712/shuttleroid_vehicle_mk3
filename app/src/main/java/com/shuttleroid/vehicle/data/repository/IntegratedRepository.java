@@ -10,7 +10,6 @@ import com.shuttleroid.vehicle.data.entity.Route;
 import com.shuttleroid.vehicle.data.mapper.IntegratedMapper;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 public class IntegratedRepository {
     // field -----------------------------
@@ -40,7 +39,7 @@ public class IntegratedRepository {
     public void replaceAllFromDto(DataInfoDto dto) {
         IntegratedMapper.DataBundle bundle = IntegratedMapper.fromDto(dto);
         if (bundle != null) {
-            AppExecutors.diskIO().execute(() -> {
+            RoomExecutors.diskIO().execute(() -> {
                 integratedDao.replaceAll(bundle.routes, bundle.stops);
             });
         }
