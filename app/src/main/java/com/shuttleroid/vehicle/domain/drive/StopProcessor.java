@@ -7,7 +7,7 @@ package com.shuttleroid.vehicle.domain.drive;
 public class StopProcessor {
 
 
-
+    //=============== Main Logic ==============
     public static void updateLocation(){
         // TODO: get location from gps + remain distance calculate
     }

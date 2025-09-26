@@ -49,7 +49,7 @@ public class SyncManager {
         syncService.sendLocationReport(new LocationReportDto(vehicleNo, route, stopLocation)).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response){
-                //Todo: Success process
+                Log.d("Sync_Location", "Send Location Successful");
             }
             @Override
             public void onFailure(Call<Void> call, Throwable t){
