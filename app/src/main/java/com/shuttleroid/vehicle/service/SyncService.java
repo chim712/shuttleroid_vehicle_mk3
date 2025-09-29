@@ -1,7 +1,10 @@
 package com.shuttleroid.vehicle.service;
 
+import com.shuttleroid.vehicle.data.dto.CourseDto;
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
 import com.shuttleroid.vehicle.data.dto.LocationReportDto;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -23,6 +26,9 @@ public interface SyncService {
     @GET("update")   // <-- 실제 서버 경로 맞게 수정 필요
     Call<DataInfoDto> getUpdateData(@Query("orgID") long orgID);
     // => example.com/update?orgID=123456
+
+    @GET("schedule")
+    Call<List<CourseDto>> getScheduleData(@Query("driverID") long driverID);
 
     //TODO: @POST("location")       : 차량 위치 전송
     // Temp Post Logic

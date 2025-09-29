@@ -12,13 +12,7 @@ import java.util.concurrent.Executors;
  */
 public class RoomExecutors {
     private static final ExecutorService diskIO = Executors.newSingleThreadExecutor();
-    private static final Handler mainHandler = new Handler(Looper.getMainLooper());
-
     public static ExecutorService diskIO() {
         return diskIO;
-    }
-
-    public static Handler mainThread() {
-        return mainHandler;
     }
 }

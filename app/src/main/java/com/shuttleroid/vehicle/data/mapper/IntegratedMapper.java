@@ -1,11 +1,15 @@
 package com.shuttleroid.vehicle.data.mapper;
 
 import com.shuttleroid.vehicle.data.dto.BusStopDto;
+import com.shuttleroid.vehicle.data.dto.CourseDto;
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
 import com.shuttleroid.vehicle.data.dto.RouteDto;
 import com.shuttleroid.vehicle.data.entity.BusStop;
+import com.shuttleroid.vehicle.data.entity.Course;
 import com.shuttleroid.vehicle.data.entity.Route;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +40,17 @@ public class IntegratedMapper {
         );
     }
 
+    public static Course fromDto(CourseDto dto){
+        if(dto==null) return null;
+
+        LocalTime departure = null;
+        if(dto.departureTime!=null && !dto.departureTime.isBlank()){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            departure = LocalTime.parse(dto.departureTime, formatter);
+        }
+        return new Course(dto.routeID, departure);
+    }
+
     // List Mapper
     public static List<BusStop> fromDtoBusStops(List<BusStopDto> dtos) {
         if (dtos == null) return null;
@@ -47,6 +62,15 @@ public class IntegratedMapper {
     }
 
     public static List<Route> fromDtoRoutes(List<RouteDto> dtos) {
+        if (dtos == null) return null;
+        return Collections.unmodifiableList(
+                dtos.stream()
+                        .map(IntegratedMapper::fromDto)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    public static List<Course> fromDtoCourses(List<CourseDto> dtos) {
         if (dtos == null) return null;
         return Collections.unmodifiableList(
                 dtos.stream()

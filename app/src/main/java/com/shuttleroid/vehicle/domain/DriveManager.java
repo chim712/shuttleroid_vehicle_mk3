@@ -1,4 +1,4 @@
-package com.shuttleroid.vehicle.domain.drive;
+package com.shuttleroid.vehicle.domain;
 
 public class DriveManager {
 

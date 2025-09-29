@@ -3,9 +3,14 @@ package com.shuttleroid.vehicle.service;
 import android.content.Context;
 import android.util.Log;
 
+import com.shuttleroid.vehicle.data.dto.CourseDto;
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
 import com.shuttleroid.vehicle.data.dto.LocationReportDto;
+import com.shuttleroid.vehicle.data.entity.Course;
+import com.shuttleroid.vehicle.data.mapper.IntegratedMapper;
 import com.shuttleroid.vehicle.data.repository.IntegratedRepository;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,7 +35,7 @@ public class SyncManager {
         syncService.getUpdateData(orgID).enqueue(new Callback<DataInfoDto>() {
             @Override
             public void onResponse(Call<DataInfoDto> call, Response<DataInfoDto> response) {
-                Log.d("SyncManager","onResponse");
+                Log.d("Sync_Update","onResponse");
                 if (response.isSuccessful() && response.body() != null) {
                     repository.replaceAllFromDto(response.body());
                 }
@@ -41,6 +46,26 @@ public class SyncManager {
                 //Todo: Failure process
 
                 Log.e("Sync_Update", "onFailure: " + t.getMessage());
+            }
+        });
+    }
+
+    public void scheduleRequest(long driverID){
+        Log.d("SyncManager", "scheduleRequest");
+        syncService.getScheduleData(driverID).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<List<CourseDto>> call, Response<List<CourseDto>> response) {
+                Log.d("Sync_Schedule", "onResponse");
+                if (response.isSuccessful() && response.body() != null) {
+                    repository.replaceSchedules(response.body());
+                } else {
+                    Log.e("Sync_Schedule", "Error: Code="+response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CourseDto>> call, Throwable t) {
+                Log.e("Sync_Schedule", "onFailure: " + t.getMessage());
             }
         });
     }

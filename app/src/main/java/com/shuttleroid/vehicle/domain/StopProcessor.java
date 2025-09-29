@@ -1,4 +1,4 @@
-package com.shuttleroid.vehicle.domain.drive;
+package com.shuttleroid.vehicle.domain;
 
 // Location Update and Calculate
 // BusStop Status Update
@@ -8,7 +8,7 @@ public class StopProcessor {
 
 
     //=============== Main Logic ==============
-    public static void updateLocation(){
+    public static void updateLocation(double lat, double lon){
         // TODO: get location from gps + remain distance calculate
     }
     private static void onApproach(){

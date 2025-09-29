@@ -4,10 +4,12 @@ import android.content.Context;
 
 import com.shuttleroid.vehicle.data.dao.IntegratedDao;
 import com.shuttleroid.vehicle.data.database.AppDatabase;
+import com.shuttleroid.vehicle.data.dto.CourseDto;
 import com.shuttleroid.vehicle.data.dto.DataInfoDto;
 import com.shuttleroid.vehicle.data.entity.BusStop;
 import com.shuttleroid.vehicle.data.entity.Route;
 import com.shuttleroid.vehicle.data.mapper.IntegratedMapper;
+import com.shuttleroid.vehicle.domain.CourseProcessor;
 
 import java.util.List;
 
@@ -43,5 +45,9 @@ public class IntegratedRepository {
                 integratedDao.replaceAll(bundle.routes, bundle.stops);
             });
         }
+    }
+
+    public void replaceSchedules(List<CourseDto> dto){
+        CourseProcessor.addCourses(IntegratedMapper.fromDtoCourses(dto));
     }
 }
