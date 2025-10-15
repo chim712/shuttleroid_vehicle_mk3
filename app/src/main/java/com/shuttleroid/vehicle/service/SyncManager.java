@@ -95,7 +95,7 @@ public class SyncManager {
     // Singleton Constructor =======================================
     private SyncManager(Context context) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://host.imagine.io.kr/") // TODO: 실제 서버 주소
+                .baseUrl("https://host.imagine.io.kr/") // TODO: 실제 서버 주소
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -108,7 +108,7 @@ public class SyncManager {
         if (instance == null) {
             synchronized (SyncManager.class) {
                 if (instance == null) {
-                    instance = new SyncManager(context);
+                    instance = new SyncManager(context.getApplicationContext());
                 }
             }
         }

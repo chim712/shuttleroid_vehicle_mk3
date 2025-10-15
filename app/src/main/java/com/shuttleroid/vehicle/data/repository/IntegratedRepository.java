@@ -12,6 +12,7 @@ import com.shuttleroid.vehicle.data.mapper.IntegratedMapper;
 import com.shuttleroid.vehicle.domain.CourseProcessor;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class IntegratedRepository {
     // field -----------------------------
@@ -33,6 +34,31 @@ public class IntegratedRepository {
         return instance;
 
     }
+
+    // DB Search (Get)
+    public BusStop getBusStop(long stopID){
+        return integratedDao.getBusStop(stopID);
+    }
+
+    public Route getRoute(long RouteID){
+        return integratedDao.getRoute(RouteID);
+    }
+
+    public void getRouteAsync(long routeID, Consumer<Route> callback) {
+        RoomExecutors.diskIO().execute(() -> {
+            Route route = integratedDao.getRoute(routeID);
+            RoomExecutors.mainThread().execute(() -> callback.accept(route));
+        });
+    }
+
+    public void getBusStopAsync(long stopID, Consumer<BusStop> callback) {
+        RoomExecutors.diskIO().execute(() -> {
+            BusStop stop = integratedDao.getBusStop(stopID);
+            RoomExecutors.mainThread().execute(() -> callback.accept(stop));
+        });
+    }
+
+
     // DB logic ---------------------------
     public void replaceAll(List<Route> routes, List<BusStop> stops) {
         integratedDao.replaceAll(routes, stops);
@@ -48,6 +74,8 @@ public class IntegratedRepository {
     }
 
     public void replaceSchedules(List<CourseDto> dto){
-        CourseProcessor.addCourses(IntegratedMapper.fromDtoCourses(dto));
+        RoomExecutors.diskIO().execute(() -> {
+            CourseProcessor.addCourses(IntegratedMapper.fromDtoCourses(dto));
+        });
     }
 }

@@ -33,6 +33,9 @@ public interface IntegratedDao {
     @Query("SELECT * FROM Route WHERE routeID = :routeId LIMIT 1")
     Route getRoute(long routeId);
 
+    @Query("SELECT * FROM BusStop WHERE stopID = :stopId LIMIT 1")
+    BusStop getBusStop(long stopId);
+
     @Query("SELECT * FROM Route ORDER BY routeName ASC")
     List<Route> getAllRoutes();
 

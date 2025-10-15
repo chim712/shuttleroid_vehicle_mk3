@@ -11,4 +11,16 @@ public class Course {
         this.routeID = routeID;
         this.departureTime = departureTime;
     }
+
+    public String toString(){
+        return routeID + " " + departureTime;
+    }
+
+    public long getRouteID() {
+        return routeID;
+    }
+
+    public LocalTime getDepartureTime() {
+        return departureTime;
+    }
 }

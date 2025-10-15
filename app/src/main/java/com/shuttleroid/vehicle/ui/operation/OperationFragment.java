@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.shuttleroid.vehicle.R;
+import com.shuttleroid.vehicle.domain.CourseProcessor;
+import com.shuttleroid.vehicle.domain.StopProcessor;
 
 
 public class OperationFragment extends Fragment {
@@ -39,6 +42,14 @@ public class OperationFragment extends Fragment {
 
         // 필요 시 동적으로 값 변경
         // viewModel.setBottomTexts("새로운 문구1", "새로운 문구2");
+
+        Button myButton = view.findViewById(R.id.settingButton);
+        myButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CourseProcessor.nextStop();
+            }
+        });
 
         return view;
     }

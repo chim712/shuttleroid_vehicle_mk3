@@ -44,6 +44,7 @@ public class UpdateFragment extends Fragment {
             public void onClick(View v) {
                 if (listener != null) {
                     SyncManager.getInstance(getContext()).updateRequest(101);
+                    SyncManager.getInstance(getContext()).scheduleRequest(101001);
                     listener.onGoToOperation();
                 }
             }
