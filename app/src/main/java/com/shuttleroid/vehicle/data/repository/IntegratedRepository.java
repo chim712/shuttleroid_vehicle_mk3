@@ -9,7 +9,7 @@ import com.shuttleroid.vehicle.data.dto.DataInfoDto;
 import com.shuttleroid.vehicle.data.entity.BusStop;
 import com.shuttleroid.vehicle.data.entity.Route;
 import com.shuttleroid.vehicle.data.mapper.IntegratedMapper;
-import com.shuttleroid.vehicle.domain.CourseProcessor;
+import com.shuttleroid.vehicle.domain.CourseEngine;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -73,9 +73,9 @@ public class IntegratedRepository {
         }
     }
 
-    public void replaceSchedules(List<CourseDto> dto){
-        RoomExecutors.diskIO().execute(() -> {
-            CourseProcessor.addCourses(IntegratedMapper.fromDtoCourses(dto));
-        });
-    }
+//    public void replaceSchedules(List<CourseDto> dto){
+//        RoomExecutors.diskIO().execute(() -> {
+//            CourseEngine.addCourses(IntegratedMapper.fromDtoCourses(dto));
+//        });
+//    }
 }

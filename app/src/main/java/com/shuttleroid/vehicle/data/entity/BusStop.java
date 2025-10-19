@@ -39,4 +39,37 @@ public class BusStop {
         this.lineDepart = lineDepart;
         this.announce = announce;
     }
+
+
+    public long getStopID() {
+        return stopID;
+    }
+
+    public String getStopName() {
+        return stopName;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public int getApproach() {
+        return lineApproach;
+    }
+
+    public int getArrive() {
+        return lineArrive;
+    }
+
+    public int getDepart() {
+        return lineDepart;
+    }
+
+    public String getAnnounce() {
+        return announce;
+    }
 }

@@ -1,21 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical" android:padding="16dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update Fragment"
-        android:textSize="24sp" />
+    <EditText
+        android:id="@+id/edtDataVer"
+        android:hint="dataVer (yymmddnnn)"
+        android:inputType="number"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/btnGoToOperation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Go to Operation" />
+        android:id="@+id/btnDoUpdate"
+        android:text="업데이트"
+        android:layout_width="match_parent" android:layout_height="wrap_content" />
 
+    <Button
+        android:id="@+id/btnLoadSchedule"
+        android:text="스케줄 불러오기"
+        android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnGoOperation"
+        android:text="운행 화면으로"
+        android:layout_width="match_parent" android:layout_height="wrap_content" />
 </LinearLayout>

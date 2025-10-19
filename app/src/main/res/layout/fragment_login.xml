@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical" android:padding="16dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login Fragment"
-        android:textSize="24sp" />
+    <EditText
+        android:id="@+id/edtDriverId"
+        android:hint="사원 ID (Long)"
+        android:inputType="number"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/edtPassword"
+        android:hint="비밀번호"
+        android:inputType="textPassword"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 
     <Button
         android:id="@+id/btnLogin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Login Success" />
-
+        android:text="로그인"
+        android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>

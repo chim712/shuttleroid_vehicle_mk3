@@ -1,106 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical" android:padding="16dp"
+    android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <!-- 중앙 상단: 시간 / 날짜 -->
+    <!-- 1) 시계 -->
+    <TextView
+        android:id="@+id/txtClock"
+        android:text="12:34:56"
+        android:textSize="28sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- 2) 정보(가로 3칸: 노선명/출발지/출발시각) -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_weight="0.4"
-        android:paddingTop="50dp">
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:weightSum="3" android:paddingTop="12dp">
 
-        <!-- 시계 -->
-        <TextClock
-            android:id="@+id/textClockTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:format12Hour="HH:mm"
-            android:format24Hour="HH:mm"
-            android:textSize="110sp"
-            android:textStyle="bold"
-            android:gravity="center" />
-
-        <!-- 날짜 -->
-        <TextClock
-            android:id="@+id/textClockDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:format12Hour="MM월 dd일 (E)"
-            android:format24Hour="MM월 dd일 (E)"
-            android:textSize="30sp"
-            android:gravity="center" />
+        <TextView android:id="@+id/txtInfo1"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="학내순환(휴일)"/>
+        <TextView android:id="@+id/txtInfo2"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="신창역 환승장 출발"/>
+        <TextView android:id="@+id/txtInfo3"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="16:30 출발"/>
     </LinearLayout>
 
-
-    <!-- 중앙 하단: 두 개의 문자열 -->
+    <!-- 3) 버튼들 -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.2"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center" android:paddingTop="16dp">
 
-        <TextView
-            android:id="@+id/textBottom1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Route Name"
-            android:textSize="40sp" />
-
-        <TextView
-            android:id="@+id/textBottom2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="30sp"
-            android:text="BusStop Name"
-            android:textSize="25sp" />
+        <Button android:id="@+id/btnAnnounce" android:text="방송"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/btnSettings" android:text="설정"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+        <Button android:id="@+id/btnEmergency" android:text="긴급"
+            android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
     </LinearLayout>
 
-
-
-    <!--하단 네비게이션 바-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_weight="0.2"
-        android:layout_marginBottom="40dp">
-        <Button
-            android:id="@+id/settingButton"
-            style="@style/button.fill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#4477ff"
-            android:text="설정"
-            android:textSize="24sp"
-            />
-        <Button
-            android:id="@+id/emergencyButton"
-            style="@style/button.fill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:backgroundTint="#ee2255"
-            android:text="긴급"
-            android:textSize="24sp"
-            />
-        <Button
-            android:id="@+id/announceButton"
-            style="@style/button.fill"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:backgroundTint="#4477ff"
-            android:text="방송"
-            android:textSize="24sp"
-
-            />
-    </LinearLayout>
-
+    <!-- WAITING 전용: 수동출발 버튼 -->
+    <Button
+        android:id="@+id/btnManualStart"
+        android:text="수동 출발"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"/>
 </LinearLayout>
