@@ -37,8 +37,6 @@ public class LoginViewModel extends AndroidViewModel {
         OrgCheckReq req = new OrgCheckReq();
         req.orgID = orgId;
 
-        Log.wtf("Login","Req, orgID: "+req.orgID);
-
         api.orgCheck(req).enqueue(new Callback<OrgCheckRes>() {
             @Override public void onResponse(Call<OrgCheckRes> call, Response<OrgCheckRes> resp) {
                 if (resp.isSuccessful() && resp.body()!=null){

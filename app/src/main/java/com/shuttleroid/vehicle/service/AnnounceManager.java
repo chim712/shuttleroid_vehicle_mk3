@@ -56,7 +56,7 @@ public class AnnounceManager {
     }
 
     /** 새로운 안내방송 시작 (기존 방송 중단 후 새로 시작) */
-    public synchronized void startAnnouncement(String currentStop, String nextStop) {
+    public synchronized void typeA(String currentStop, String nextStop) {
         stopCurrent(); // 기존 방송 중단
 
         currentThread = new Thread(() -> {
@@ -73,6 +73,32 @@ public class AnnounceManager {
                 // 3. "다음 정류소는~"
                 //playSound(R.raw.next_stop);
                 speak("다음 정류소는, " + nextStop + " 입니다.");
+
+            } catch (InterruptedException e) {
+                Log.d("AnnounceManager", "Announcement interrupted");
+            } finally {
+                isPlaying = false;
+            }
+        });
+        currentThread.start();
+        Log.d("AnnounceManager", "Announcement started");
+    }
+
+
+    public synchronized void typeB(String lastStop) {
+        stopCurrent(); // 기존 방송 중단
+
+        currentThread = new Thread(() -> {
+            try {
+                isPlaying = true;
+
+                // 1. 차임벨
+                //playSound(R.raw.chime);
+
+                // 2. "이번 정류소는~"
+                //playSound(R.raw.this_stop);
+                speak("이번 정류소는, " + lastStop + " 입니다. 마지막 정류소입니다.");
+
 
             } catch (InterruptedException e) {
                 Log.d("AnnounceManager", "Announcement interrupted");

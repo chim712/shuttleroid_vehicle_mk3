@@ -36,7 +36,7 @@ public class OperationViewModel extends AndroidViewModel {
     }
 
     public DriveController ensureController(){
-        if (controller==null) controller = new DriveController(getApplication(), gps.locationLive());
+        if (controller==null) controller = new DriveController(getApplication());
         return controller;
     }
 

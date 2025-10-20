@@ -4,17 +4,21 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.Button;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+
 import com.shuttleroid.vehicle.R;
+import com.shuttleroid.vehicle.app.SessionStore;
 import com.shuttleroid.vehicle.controller.DriveController;
 import com.shuttleroid.vehicle.domain.StopEngine;
 import com.shuttleroid.vehicle.util.TimeUtil;
 
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class OperationFragment extends Fragment {
 
@@ -24,6 +28,7 @@ public class OperationFragment extends Fragment {
 
     private Long routeId;
     private String departTime; // "HH:mm"
+    private final DateTimeFormatter clockFmt = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -51,42 +56,46 @@ public class OperationFragment extends Fragment {
 
         LocalTime depart = TimeUtil.parseHm(departTime);
         info1.setText("노선ID: " + routeId);
-        info2.setText("출발지: (첫 정류장)"); // TODO DB에서 조회
+        info2.setText("출발지: (첫 정류장)"); // TODO DB에서 조회하여 대체
         info3.setText(departTime + " 출발");
 
         DriveController c = vm.ensureController();
 
+        // ▶︎ 운행 컨텍스트 세팅 (SessionStore 보조)
+        SessionStore ss = SessionStore.getInstance();
+        String vehicleId = ss.getVehicleId();
+        String courseId = ss.getCurrentCourseId(); // 없으면 null 허용
+        c.setRouteContext(routeId != null ? routeId : -1L, departTime, courseId, vehicleId);
+
+        // ▶︎ 자동 대기 → 출발 (T-3분)
         c.startWaiting(depart, getViewLifecycleOwner(), new DriveController.Callbacks() {
             @Override public void onAutoStart() {
-                // TODO /route/start (flag=true)
+                // 필요 시 Foreground 알림 문구 업데이트 등
             }
-            @Override public void onLocationEvent(StopEngine.Event e) {
-                // TODO /location + AnnounceManager
-            }
-            @Override public void onReachedTerminal() {
-                // TODO /route/terminate
-            }
+            @Override public void onLocationEvent(StopEngine.Event e) { /* UI 갱신 필요 시 */ }
+            @Override public void onReachedTerminal() { /* 다음 코스 안내/종료 UI */ }
             @Override public void onTick(ZonedDateTime now) {
-                clock.setText(now.toLocalTime().toString());
+                clock.setText(now.toLocalTime().format(clockFmt));
             }
         });
 
-        c.observeRunning(getViewLifecycleOwner(), new DriveController.Callbacks() {
-            @Override public void onAutoStart() {}
-            @Override public void onLocationEvent(StopEngine.Event e) { /* TODO */ }
-            @Override public void onReachedTerminal() { /* TODO */ }
-            @Override public void onTick(ZonedDateTime now) {
-                clock.setText(now.toLocalTime().toString());
-            }
+        // ▶︎ RUNNING 상태 관찰 (observeRunning → running().observe로 수정)
+        c.running().observe(getViewLifecycleOwner(), isRunning -> {
+            // 필요 시 버튼 활성/비활성 등 UI 반영
+            // WAITING일 땐 수동출발 버튼 활성, RUNNING일 땐 비활성 등
+            btnManualStart.setEnabled(Boolean.FALSE.equals(isRunning));
         });
 
-        btnManualStart.setOnClickListener(v1 -> c.forceStart(new DriveController.Callbacks() {
-            @Override public void onAutoStart() { /* TODO /route/start */ }
-            @Override public void onLocationEvent(StopEngine.Event e) {}
-            @Override public void onReachedTerminal() {}
-            @Override public void onTick(ZonedDateTime now) {}
-        }));
+        // ▶︎ 수동 출발
+        btnManualStart.setOnClickListener(v1 ->
+                c.forceStart(new DriveController.Callbacks() {
+                    @Override public void onAutoStart() { /* 알림 문구 업데이트 등 */ }
+                    @Override public void onTick(ZonedDateTime now) {
+                        clock.setText(now.toLocalTime().format(clockFmt));
+                    }
+                })
+        );
 
-        // TODO: 방송/설정/긴급 핸들러
+        // TODO: 방송/설정/긴급 버튼 핸들러 연결
     }
 }

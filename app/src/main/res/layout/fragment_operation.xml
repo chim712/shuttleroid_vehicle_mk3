@@ -6,25 +6,44 @@
     <TextView
         android:id="@+id/txtClock"
         android:text="12:34:56"
-        android:textSize="28sp"
+        android:textSize="77sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <!-- 2) 정보(가로 3칸: 노선명/출발지/출발시각) -->
     <LinearLayout
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="horizontal" android:weightSum="3" android:paddingTop="12dp">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="36dp"
+        android:paddingBottom="96dp"
+        android:paddingHorizontal="16dp">
 
-        <TextView android:id="@+id/txtInfo1"
-            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="학내순환(휴일)"/>
-        <TextView android:id="@+id/txtInfo2"
-            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="신창역 환승장 출발"/>
-        <TextView android:id="@+id/txtInfo3"
-            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-            android:text="16:30 출발"/>
+        <TextView
+            android:id="@+id/txtInfo1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="학내순환(휴일)"
+            android:textSize="32sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/txtInfo2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="신창역 환승장 출발"
+            android:textSize="16sp"
+            android:layout_marginBottom="22dp" />
+
+        <TextView
+            android:id="@+id/txtInfo3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="46sp"
+            android:text="16:30 출발" />
     </LinearLayout>
+
+
 
     <!-- 3) 버튼들 -->
     <LinearLayout

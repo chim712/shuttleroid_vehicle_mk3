@@ -1,9 +1,12 @@
 package com.shuttleroid.vehicle.ui.main;
 
 import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -53,6 +56,18 @@ public class MainActivity extends AppCompatActivity
                     .beginTransaction()
                     .replace(R.id.main_container, new OrgCheckFragment())
                     .commit();
+        }
+
+        // Android 13+에서 알림 권한 런타임 요청
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                        this,
+                        new String[]{ Manifest.permission.POST_NOTIFICATIONS },
+                        2002
+                );
+            }
         }
     }
 

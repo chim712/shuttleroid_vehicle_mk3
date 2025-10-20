@@ -1,6 +1,8 @@
 package com.shuttleroid.vehicle.util;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.widget.Toast;
 
@@ -11,8 +13,12 @@ public class Toasts {
     public static void throttled(Context ctx, String msg){
         long now = SystemClock.elapsedRealtime();
         if (now - lastShown >= INTERVAL_MS) {
-            Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-            lastShown = now;
+            Handler main = new Handler(Looper.getMainLooper());
+            main.post(() -> {
+                Toast.makeText(ctx.getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+            });
+            //Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+            //lastShown = now;
         }
     }
 }
