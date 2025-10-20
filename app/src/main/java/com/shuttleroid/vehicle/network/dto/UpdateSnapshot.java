@@ -1,33 +1,30 @@
+// app/src/main/java/com/shuttleroid/vehicle/network/dto/UpdateSnapshot.java
 package com.shuttleroid.vehicle.network.dto;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
-/**
- * GET /update (data.json) 매핑 DTO (예시 스키마)
- * - 서버 data.json 구조에 맞춰 필드명을 실제와 동일하게 맞추세요.
- * - 아래는 일반적인 형태 예시이며, 필요 시 필드/타입 변경하세요.
- */
+/** /update (data.json) 실제 스키마 매핑 */
 public class UpdateSnapshot {
-    public List<RouteDto> routes;
-    public List<BusStopDto> busStops;
-    public Long dataVer; // 선택: 서버가 내려줄 경우
-
-    public static class RouteDto {
-        public Long routeID;
-        public String routeName;
-        public String spendTime;      // 선택
-        public List<Long> stopIds;    // 경유 정류장 ID 목록
-    }
+    @SerializedName("organizationId") public Long organizationId; // 선택
+    @SerializedName("updateVersion")  public Long updateVersion;
+    @SerializedName("stopList")       public List<BusStopDto> stopList;
+    @SerializedName("routeList")      public List<RouteDto> routeList;
 
     public static class BusStopDto {
-        public Long stopID;
-        public String stopName;
-        public double latitude;
-        public double longitude;
+        @SerializedName("stopID")    public String stopID;    // "1010001"
+        @SerializedName("stopName")  public String stopName;
+        @SerializedName("latitude")  public String latitude;  // "36.77279"
+        @SerializedName("longitude") public String longitude; // "126.93384"
+        @SerializedName("approach")  public String approach;  // "150"
+        @SerializedName("arrival")   public String arrival;   // "20"
+        @SerializedName("leave")     public String leave;     // "30"
+    }
 
-        // 반경 파라미터: null일 수 있음(그 경우 기본 500/30/50 사용)
-        public String approach; // "500"
-        public String arrival;  // "30"
-        public String leave;    // "50"
+    public static class RouteDto {
+        @SerializedName("routeID")   public String routeID;   // "102"
+        @SerializedName("routeName") public String routeName;
+        @SerializedName("spendTime") public String spendTime; // "8"
+        @SerializedName("stopIds")   public List<Long> stopIds; // [1010001, ...] (숫자)
     }
 }

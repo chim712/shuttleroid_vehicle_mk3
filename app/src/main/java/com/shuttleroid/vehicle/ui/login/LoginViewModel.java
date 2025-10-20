@@ -1,6 +1,8 @@
 package com.shuttleroid.vehicle.ui.login;
 
 import android.app.Application;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
@@ -34,6 +36,8 @@ public class LoginViewModel extends AndroidViewModel {
     public void checkOrg(Long orgId){
         OrgCheckReq req = new OrgCheckReq();
         req.orgID = orgId;
+
+        Log.wtf("Login","Req, orgID: "+req.orgID);
 
         api.orgCheck(req).enqueue(new Callback<OrgCheckRes>() {
             @Override public void onResponse(Call<OrgCheckRes> call, Response<OrgCheckRes> resp) {

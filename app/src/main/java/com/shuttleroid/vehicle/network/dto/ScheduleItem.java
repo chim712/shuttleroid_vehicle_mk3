@@ -1,10 +1,11 @@
+// app/src/main/java/com/shuttleroid/vehicle/network/dto/ScheduleItem.java
 package com.shuttleroid.vehicle.network.dto;
 
-/** GET /schedule 응답의 원소 (당일)
- *  - routeID(Long)
- *  - departureTime("HH:mm")
- */
+import com.google.gson.annotations.SerializedName;
+
+/** GET /schedule 응답 원소 (routeID가 문자열로 내려옴) */
 public class ScheduleItem {
-    public Long routeID;
-    public String departureTime; // "HH:mm"
+    @SerializedName("routeID") public Long routeID;       // "102" / "192"
+    @SerializedName("departureTime") public String departureTime; // "HH:mm"
+
 }

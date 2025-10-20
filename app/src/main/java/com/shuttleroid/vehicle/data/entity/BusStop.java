@@ -11,17 +11,17 @@ public class BusStop {
     @PrimaryKey(autoGenerate = false)
     public long stopID;
     public String stopName;
-    public double lat;
-    public double lon;
+    public double latitude;
+    public double longitude;
 
     // Bus Stop Approach Judge Boundary
     @ColumnInfo(name="lineApproach", defaultValue = "200")
     @NonNull
-    public int lineApproach;
+    public int approach;
     @ColumnInfo(name="lineArrive", defaultValue = "20")
-    public int lineArrive;
+    public int arrival;
     @ColumnInfo(name="lineDepart", defaultValue = "30")
-    public int lineDepart;
+    public int depart;
 
     // Announcement - default: TTS Sound
     @ColumnInfo(name="announce", defaultValue = "default")
@@ -29,14 +29,14 @@ public class BusStop {
 
     public BusStop(){}
     @Ignore
-    public BusStop(long stopID, String stopName, double lat, double lon, int lineApproach, int lineArrive, int lineDepart, String announce) {
+    public BusStop(long stopID, String stopName, double lat, double lon, int approach, int arrival, int depart, String announce) {
         this.stopID = stopID;
         this.stopName = stopName;
-        this.lat = lat;
-        this.lon = lon;
-        this.lineApproach = lineApproach;
-        this.lineArrive = lineArrive;
-        this.lineDepart = lineDepart;
+        this.latitude = lat;
+        this.longitude = lon;
+        this.approach = approach;
+        this.arrival = arrival;
+        this.depart = depart;
         this.announce = announce;
     }
 
@@ -49,24 +49,24 @@ public class BusStop {
         return stopName;
     }
 
-    public double getLat() {
-        return lat;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public double getLon() {
-        return lon;
+    public double getLongitude() {
+        return longitude;
     }
 
     public int getApproach() {
-        return lineApproach;
+        return approach;
     }
 
-    public int getArrive() {
-        return lineArrive;
+    public int getArrival() {
+        return arrival;
     }
 
     public int getDepart() {
-        return lineDepart;
+        return depart;
     }
 
     public String getAnnounce() {

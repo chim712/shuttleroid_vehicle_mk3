@@ -30,15 +30,15 @@ public class IntegratedMapper {
         );
     }
 
-    public static Route fromDto(RouteDto dto) {
-        if (dto == null) return null;
-        return new Route(
-                dto.routeID,
-                dto.routeName,
-                dto.spendTime,
-                dto.stopIds
-        );
-    }
+//    public static Route fromDto(RouteDto dto) {
+//        if (dto == null) return null;
+//        return new Route(
+//                dto.routeID,
+//                dto.routeName,
+//                dto.spendTime,
+//                dto.stopIds
+//        );
+//    }
 
     public static Course fromDto(CourseDto dto){
         if(dto==null) return null;
@@ -61,14 +61,14 @@ public class IntegratedMapper {
         );
     }
 
-    public static List<Route> fromDtoRoutes(List<RouteDto> dtos) {
-        if (dtos == null) return null;
-        return Collections.unmodifiableList(
-                dtos.stream()
-                        .map(IntegratedMapper::fromDto)
-                        .collect(Collectors.toList())
-        );
-    }
+//    public static List<Route> fromDtoRoutes(List<RouteDto> dtos) {
+//        if (dtos == null) return null;
+//        return Collections.unmodifiableList(
+//                dtos.stream()
+//                        .map(IntegratedMapper::fromDto)
+//                        .collect(Collectors.toList())
+//        );
+//    }
 
     public static List<Course> fromDtoCourses(List<CourseDto> dtos) {
         if (dtos == null) return null;
@@ -90,10 +90,10 @@ public class IntegratedMapper {
         }
     }
 
-    public static DataBundle fromDto(DataInfoDto dto) {
-        if (dto == null) return null;
-        List<BusStop> stops = fromDtoBusStops(dto.stopList);
-        List<Route> routes = fromDtoRoutes(dto.routeList);
-        return new DataBundle(stops, routes);
-    }
+//    public static DataBundle fromDto(DataInfoDto dto) {
+//        if (dto == null) return null;
+//        List<BusStop> stops = fromDtoBusStops(dto.stopList);
+//        List<Route> routes = fromDtoRoutes(dto.routeList);
+//        return new DataBundle(stops, routes);
+//    }
 }

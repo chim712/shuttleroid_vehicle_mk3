@@ -1,27 +1,13 @@
+// app/src/main/java/com/shuttleroid/vehicle/data/entity/Route.java
 package com.shuttleroid.vehicle.data.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
-import java.util.List;
-
-@Entity
+@Entity(tableName = "route")
 public class Route {
-    @PrimaryKey(autoGenerate = false)
-    public long routeID;
-    public String routeName;
-    public int spendTime;
-
-    public List<Long> stopIds;
-
-
-    public Route() {}
-    @Ignore
-    public Route(long routeID, String routeName, int spendTime, List<Long> stopIds) {
-        this.routeID = routeID;
-        this.routeName = routeName;
-        this.spendTime = spendTime;
-        this.stopIds = stopIds;
-    }
+    @PrimaryKey public long routeID;          // Long 통일
+    @NonNull public String routeName = "";
+    public String spendTime;                  // 분(문자열 보존)
 }
