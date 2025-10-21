@@ -1,6 +1,6 @@
 package com.shuttleroid.vehicle.controller;
 
-import static com.shuttleroid.vehicle.controller.DriveController.Event.DEPART;
+import static com.shuttleroid.vehicle.controller.DriveController.Event.DEPARTURE;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -58,7 +58,7 @@ import retrofit2.Response;
 public class DriveController {
 
     public enum State { WAITING, RUNNING, TERMINATED}
-    public enum Event { NONE, APPROACH, ARRIVE, DEPART }
+    public enum Event { NONE, APPROACH, ARRIVAL, DEPARTURE}
 
     public interface Callbacks {
         default void onAutoStart() {}
@@ -220,7 +220,7 @@ public class DriveController {
                 (Build.VERSION.SDK_INT >= 28) ? app.getMainLooper() : android.os.Looper.getMainLooper());
     }
 
-    private Event currentState = DEPART;
+    private Event currentState = DEPARTURE;
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override public void onLocationResult(@NonNull LocationResult result) {
             Location loc = result.getLastLocation();
@@ -234,7 +234,7 @@ public class DriveController {
             double distance = Geomath.distanceMeters(loc.getLatitude(), loc.getLongitude(), target.latitude, target.longitude);
             // judge logic
             switch(currentState){
-                case DEPART:
+                case DEPARTURE:
                     if(distance <= target.approach){
                         currentState = Event.APPROACH;
                         AnnounceManager am = AnnounceManager.getInstance(app);
@@ -267,7 +267,7 @@ public class DriveController {
                     break;
                 case APPROACH:
                     if(distance <= target.arrival){
-                        currentState = Event.ARRIVE;
+                        currentState = Event.ARRIVAL;
                         sendLocationEvent(currentState, target);
 
                         // is Terminal?
@@ -277,9 +277,9 @@ public class DriveController {
                         }
                     }
                     break;
-                case ARRIVE:
+                case ARRIVAL:
                     if(distance >= target.depart){
-                        currentState = DEPART;
+                        currentState = DEPARTURE;
 
                         index++;
                         OperationFragment.increaseIdx();
@@ -312,19 +312,20 @@ public class DriveController {
 
     private void sendRouteReport(boolean flag) {
         //RouteReport r = RouteReport.of(courseId, routeId, departTime, vehicleId, flag);
-        RouteReport r = RouteReport.of(101001L, routeId, departTime, vehicleId, flag);
+        RouteReport r = RouteReport.of(001L, routeId, departTime, vehicleId, flag);
+        //Log.d("RouteReport", "RouteID: " + routeId);
         postWithRetry(() -> api.routeStart(r), () -> api.routeTerminate(r), flag ? "routeStart" : "routeTerminate");
     }
 
     private void sendLocationEvent(Event ev, BusStop target) {
         String status;
         switch (ev) {
-            case APPROACH: status = "Approach"; break;
-            case ARRIVE:   status = "Arrive";   break;
-            case DEPART:   status = "Depart";   break;
+            case APPROACH: status = "APPROACH"; break;
+            case ARRIVAL:   status = "ARRIVAL";   break;
+            case DEPARTURE:   status = "DEPARTURE";   break;
             default: return;
         }
-        LocationEvent e = LocationEvent.of(vehicleId, target.stopID, status);
+        LocationEvent e = LocationEvent.of(vehicleId, target.stopID % 10000, status);
         postWithRetry(() -> api.postLocation(e), null, "location:" + status);
     }
 

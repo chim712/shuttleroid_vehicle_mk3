@@ -1,20 +1,23 @@
 package com.shuttleroid.vehicle.network.api;
 
+import com.shuttleroid.vehicle.network.dto.LocationEvent;
 import com.shuttleroid.vehicle.network.dto.LoginReq;
 import com.shuttleroid.vehicle.network.dto.LoginRes;
 import com.shuttleroid.vehicle.network.dto.LogoutReq;
 import com.shuttleroid.vehicle.network.dto.OrgCheckReq;
 import com.shuttleroid.vehicle.network.dto.OrgCheckRes;
-import com.shuttleroid.vehicle.network.dto.ScheduleItem;
-import com.shuttleroid.vehicle.network.dto.LocationEvent;
 import com.shuttleroid.vehicle.network.dto.RouteReport;
+import com.shuttleroid.vehicle.network.dto.ScheduleItem;
 import com.shuttleroid.vehicle.network.dto.UpdateSnapshot;
 
 import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.*;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * 서버 API 계약 (MVP 스펙 확정본)
@@ -28,35 +31,35 @@ import retrofit2.http.*;
  * - 노선 시작:  POST /route/start         RouteReport
  * - 노선 종료:  POST /route/terminate     RouteReport
  */
-public interface SyncService {
+public interface SyncService2 {
 
     // 1) 기관 확인
-    @POST("/bus/org/check")
+    @POST("/org/check")
     Call<OrgCheckRes> orgCheck(@Body OrgCheckReq req);
 
     // 2) 로그인/로그아웃
-    @POST("/bus/auth/login")
+    @POST("/auth/login")
     Call<LoginRes> login(@Body LoginReq req);
 
-    @POST("/bus/auth/logout")
+    @POST("/auth/logout")
     Call<ResponseBody> logout(@Body LogoutReq req);
 
     // 3) 업데이트(204=최신)
-    @GET("/bus/update")
+    @GET("/update")
     Call<UpdateSnapshot> update(@Query("orgID") Long orgId, @Query("dataVer") Long dataVer);
 
     // 4) 스케줄(당일)
-    @GET("/bus/schedule")
+    @GET("/schedule")
     Call<List<ScheduleItem>> schedule(@Query("orgID") Long orgId, @Query("driverID") Long driverId);
 
     // 5) 위치 이벤트 단일 엔드포인트
-    @POST("/bus/location")
+    @POST("/location")
     Call<ResponseBody> postLocation(@Body LocationEvent ev);
 
     // 6) 노선 시작/종료
-    @POST("/bus/route/start")
+    @POST("/route/start")
     Call<ResponseBody> routeStart(@Body RouteReport req);
 
-    @POST("/bus/route/terminate")
+    @POST("/route/terminate")
     Call<ResponseBody> routeTerminate(@Body RouteReport req);
 }

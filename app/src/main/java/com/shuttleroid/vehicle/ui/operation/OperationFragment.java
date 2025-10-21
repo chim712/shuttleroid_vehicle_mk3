@@ -176,8 +176,8 @@ public class OperationFragment extends Fragment {
         if (e == null) return null;
         switch (e){
             case APPROACH: return "접근";
-            case ARRIVE:   return "도착";
-            case DEPART:   return "출발";
+            case ARRIVAL:   return "도착";
+            case DEPARTURE:   return "출발";
             default:       return null;
         }
     }

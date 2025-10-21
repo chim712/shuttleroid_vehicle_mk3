@@ -11,6 +11,7 @@ public class LocationEvent {
 
     public static LocationEvent of(String vehicleID, Long stopID, String status){
         LocationEvent e = new LocationEvent();
+        e.orgID = 1L;
         e.vehicleID = vehicleID;
         e.stopID = stopID;
         e.status = status;

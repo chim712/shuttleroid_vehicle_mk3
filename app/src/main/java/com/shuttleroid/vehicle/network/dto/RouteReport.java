@@ -14,6 +14,7 @@ public class RouteReport {
     public static RouteReport of(Long courseID, Long routeID, String departTime,
                                  String vehicleID, boolean flag){
         RouteReport r = new RouteReport();
+        r.orgID = 1L;
         r.courseID = courseID;
         r.routeID = routeID;
         r.departTime = departTime;
