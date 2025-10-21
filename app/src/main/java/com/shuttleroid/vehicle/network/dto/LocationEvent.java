@@ -4,6 +4,7 @@ package com.shuttleroid.vehicle.network.dto;
  *  status: "Approach" | "Arrive" | "Depart"
  */
 public class LocationEvent {
+    public Long orgID = 1L;
     public String vehicleID;
     public Long stopID;
     public String status;

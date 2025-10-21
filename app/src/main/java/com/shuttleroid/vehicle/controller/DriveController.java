@@ -238,13 +238,31 @@ public class DriveController {
                     if(distance <= target.approach){
                         currentState = Event.APPROACH;
                         AnnounceManager am = AnnounceManager.getInstance(app);
-                        boolean hasNext = (index + 1 < stops.size());
-                        String curr = target.stopName;
-                        String next = hasNext ? stops.get(index + 1).stopName : null;
-                        if (hasNext) am.typeA(curr, next);      // normal stop
-                        else         am.typeB(curr);            // terminal stop
+                        //boolean hasNext = (index + 1 < stops.size());
 
                         sendLocationEvent(currentState, target);
+
+                        // ignore waypoint announce
+                        int key = (int)(target.stopID / 1000 % 10);
+                        if(key == 9) break;
+
+                        String curr = target.stopName;
+                        String next = null;
+                        BusStop tmp;
+
+                        for(int i=1; index + i < stops.size(); i++){
+                            tmp = stops.get(index + i);
+                            key = (int)(tmp.stopID / 1000 % 10);
+                            if(key != 9) {
+                                next = tmp.stopName;
+                                break;
+                            }
+                        }
+
+                         //next = hasNext ? stops.get(index + 1).stopName : null;
+                        if (next != null) am.typeA(curr, next);      // normal stop
+                        else         am.typeB(curr);            // terminal stop
+
                     }
                     break;
                 case APPROACH:
@@ -294,7 +312,7 @@ public class DriveController {
 
     private void sendRouteReport(boolean flag) {
         //RouteReport r = RouteReport.of(courseId, routeId, departTime, vehicleId, flag);
-        RouteReport r = RouteReport.of("101001", routeId, departTime, vehicleId, flag);
+        RouteReport r = RouteReport.of(101001L, routeId, departTime, vehicleId, flag);
         postWithRetry(() -> api.routeStart(r), () -> api.routeTerminate(r), flag ? "routeStart" : "routeTerminate");
     }
 
