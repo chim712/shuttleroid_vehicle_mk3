@@ -12,36 +12,37 @@ import com.shuttleroid.vehicle.network.api.SyncService;
 import com.shuttleroid.vehicle.network.client.RetrofitProvider;
 import com.shuttleroid.vehicle.network.dto.ScheduleItem;
 import com.shuttleroid.vehicle.network.dto.UpdateSnapshot;
+import com.shuttleroid.vehicle.util.TimeUtil;
 import com.shuttleroid.vehicle.util.Toasts;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UpdateViewModel extends AndroidViewModel {
 
-    // ====== Public state ======
+    // ===== Public state =====
     public final MutableLiveData<Boolean> updateDone = new MutableLiveData<>(false);
     public final MutableLiveData<List<ScheduleItem>> scheduleLive = new MutableLiveData<>();
 
-    // ====== Deps ======
+    // ===== Deps =====
     private final SyncService api;
     private final IntegratedRepository repo;
 
-    // ====== Threading ======
+    // ===== Threads =====
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor();
 
-    // ====== Retry policy ======
-    private static final int RETRY_MAX = 30;          // 최대 30회
-    private static final long RETRY_DELAY_SEC = 5L;   // 5초 간격
+    // ===== Retry policy =====
+    private static final int RETRY_MAX = 30;
+    private static final long RETRY_DELAY_SEC = 5L;
     private static final long TOAST_INTERVAL_SEC = 10L;
 
     public UpdateViewModel(@NonNull Application app) {
@@ -67,7 +68,6 @@ public class UpdateViewModel extends AndroidViewModel {
         call.enqueue(new Callback<UpdateSnapshot>() {
             @Override
             public void onResponse(Call<UpdateSnapshot> c, Response<UpdateSnapshot> resp) {
-                // 204: 최신
                 if (resp.code() == 204) {
                     Toasts.throttled(getApplication(), "최신버전입니다");
                     updateDone.postValue(true);
@@ -82,19 +82,16 @@ public class UpdateViewModel extends AndroidViewModel {
                             Toasts.throttled(getApplication(),
                                     "데이터 적재 완료 (정류장=" + repo.busStopCount() + ")");
                         } catch (Throwable t) {
-                            // DB 오류는 재시도 의미 없음 → 실패 처리
                             updateDone.postValue(false);
                             Toasts.throttled(getApplication(), "DB 저장 실패: " + t.getMessage());
                         }
                     });
                 } else {
-                    // 400/500 포함 비성공 응답 → 재시도
                     retryUpdateMaybe(org, dataVer, attempt, lastToastSec);
                 }
             }
             @Override
             public void onFailure(Call<UpdateSnapshot> c, Throwable t) {
-                // 통신 실패 → 재시도
                 retryUpdateMaybe(org, dataVer, attempt, lastToastSec);
             }
         });
@@ -106,10 +103,9 @@ public class UpdateViewModel extends AndroidViewModel {
             Toasts.throttled(getApplication(), "서버 연결 불가");
             return;
         }
-        long nextAttempt = attempt + 1;
+        int nextAttempt = attempt + 1;
         long nextDelay = RETRY_DELAY_SEC;
 
-        // 10초마다 한 번만 토스트 (과다 표시 방지)
         long nextToastSec = lastToastSec + RETRY_DELAY_SEC;
         if (nextToastSec % TOAST_INTERVAL_SEC == 0) {
             Toasts.throttled(getApplication(),
@@ -117,12 +113,12 @@ public class UpdateViewModel extends AndroidViewModel {
         }
 
         sched.schedule(() ->
-                        attemptUpdate(org, dataVer, (int) nextAttempt, nextToastSec),
+                        attemptUpdate(org, dataVer, nextAttempt, nextToastSec),
                 nextDelay, TimeUnit.SECONDS);
     }
 
     // ------------------------------------------------------------------------
-    // SCHEDULE (오늘자)
+    // SCHEDULE (오늘자) — RouteID는 Long 가정
     // ------------------------------------------------------------------------
     public void loadTodaySchedule(){
         SessionStore s = SessionStore.getInstance();
@@ -141,7 +137,11 @@ public class UpdateViewModel extends AndroidViewModel {
             @Override
             public void onResponse(Call<List<ScheduleItem>> c, Response<List<ScheduleItem>> resp) {
                 if (resp.isSuccessful() && resp.body() != null) {
-                    scheduleLive.postValue(resp.body());
+                    List<ScheduleItem> list = resp.body();
+                    scheduleLive.postValue(list);
+
+                    // 현재 시각 이후의 첫 코스 → 세션 주입
+                    io.execute(() -> pickAndSetCurrentCourse(list));
                 } else {
                     retryScheduleMaybe(org, driver, attempt, lastToastSec);
                 }
@@ -151,6 +151,29 @@ public class UpdateViewModel extends AndroidViewModel {
                 retryScheduleMaybe(org, driver, attempt, lastToastSec);
             }
         });
+    }
+
+    /** RouteID가 Long 전제: ScheduleItem#getRouteID() → Long */
+    private void pickAndSetCurrentCourse(List<ScheduleItem> list){
+        if (list == null || list.isEmpty()) return;
+
+        LocalTime now = LocalTime.now(); // Asia/Seoul 전제(앱 공통)
+
+        for (ScheduleItem it : list) {
+            LocalTime hm = TimeUtil.parseHm(it.getDepartTime()); // "HH:mm"
+            if (hm == null) continue;
+            if (hm.isBefore(now)) continue; // 과거는 무시
+
+            Long rid = it.getRouteID(); // ← Long
+            if (rid == null || rid <= 0) continue;
+//
+//            String courseId = null;
+//            try { courseId = it.getCourseId(); } catch (Throwable ignore) { /* optional */ }
+
+            SessionStore.getInstance().setCurrentCourse("101", rid, it.getDepartTime());
+            return; // 오름차순 보장 → 첫 코스만 선택
+        }
+        // 남은 코스 없음 → 세션 미설정 (WAITING에서 "당일 종료" 안내)
     }
 
     private void retryScheduleMaybe(Long org, Long driver, int attempt, long lastToastSec){
@@ -164,7 +187,7 @@ public class UpdateViewModel extends AndroidViewModel {
         long nextToastSec = lastToastSec + RETRY_DELAY_SEC;
         if (nextToastSec % TOAST_INTERVAL_SEC == 0) {
             Toasts.throttled(getApplication(),
-                    "스케줄 재시도 중... (" + nextAttempt + "/" + RETRY_MAX + ")");
+                    "스케줄 재시도 중... (" + nextAttempt + "/" + 30 + ")");
         }
 
         sched.schedule(() ->

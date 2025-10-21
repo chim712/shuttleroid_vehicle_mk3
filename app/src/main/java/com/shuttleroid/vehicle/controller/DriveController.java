@@ -1,9 +1,13 @@
 package com.shuttleroid.vehicle.controller;
 
+import static com.shuttleroid.vehicle.controller.DriveController.Event.DEPART;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
@@ -20,14 +24,14 @@ import com.google.android.gms.location.LocationServices;
 import com.shuttleroid.vehicle.app.SessionStore;
 import com.shuttleroid.vehicle.data.entity.BusStop;
 import com.shuttleroid.vehicle.data.repository.IntegratedRepository;
-import com.shuttleroid.vehicle.domain.StopEngine;
+import com.shuttleroid.vehicle.location.Geomath;
 import com.shuttleroid.vehicle.network.api.SyncService;
 import com.shuttleroid.vehicle.network.client.RetrofitProvider;
 import com.shuttleroid.vehicle.network.dto.LocationEvent;
 import com.shuttleroid.vehicle.network.dto.RouteReport;
 import com.shuttleroid.vehicle.service.AnnounceManager;
+import com.shuttleroid.vehicle.ui.operation.OperationFragment;
 import com.shuttleroid.vehicle.util.Toasts;
-import com.shuttleroid.vehicle.util.TimeUtil;
 
 import java.time.Duration;
 import java.time.LocalTime;
@@ -53,11 +57,12 @@ import retrofit2.Response;
  */
 public class DriveController {
 
-    public enum State { WAITING, RUNNING, TERMINATED }
+    public enum State { WAITING, RUNNING, TERMINATED}
+    public enum Event { NONE, APPROACH, ARRIVE, DEPART }
 
     public interface Callbacks {
         default void onAutoStart() {}
-        default void onLocationEvent(StopEngine.Event e) {}
+        default void onLocationEvent(Event e) {}
         default void onReachedTerminal() {}
         default void onTick(ZonedDateTime now) {}
     }
@@ -73,7 +78,7 @@ public class DriveController {
     private final MutableLiveData<Boolean> runningLive = new MutableLiveData<>(false);
 
     private List<BusStop> stops = new ArrayList<>();
-    private int cursor = 0;
+    private int index = 0;
 
     private long routeId = -1L;          // 필수
     private String departTime = null;     // "HH:mm" (필수)
@@ -85,6 +90,7 @@ public class DriveController {
     // ===== Exec =====
     private final ScheduledExecutorService sched = Executors.newSingleThreadScheduledExecutor();
     private final ExecutorService io = Executors.newSingleThreadExecutor();
+    private final Handler main = new Handler(Looper.getMainLooper());
 
     // ===== Retry Policy =====
     private static final int RETRY_MAX = 30;
@@ -165,27 +171,41 @@ public class DriveController {
         if (courseId == null) courseId = ss.getCurrentCourseId();
 
         if (routeId <= 0 || departTime == null || vehicleId == null) {
-            Toasts.throttled(app, "운행 정보를 확인하세요(route/depart/vehicle)");
+            // UI 작업은 메인 스레드
+            main.post(() -> Toasts.throttled(app, "운행 정보를 확인하세요(route/depart/vehicle)"));
             return;
         }
 
-        // 정류장 시퀀스 로드 (동기화)
-        stops = repo.getOrderedStops(routeId);
-        if (stops == null || stops.isEmpty()) {
-            Toasts.throttled(app, "정류장 정보가 없습니다");
-            return;
-        }
-        cursor = 0;
+        // === DB 접근은 반드시 IO 스레드에서 ===
+        io.submit(() -> {
+            List<BusStop> s;
+            try {
+                s = repo.getOrderedStops(routeId);
+            } catch (Exception ex) {
+                main.post(() -> Toasts.throttled(app, "정류장 조회 실패: " + ex.getMessage()));
+                return;
+            }
 
-        // 보고: /route/start
-        sendRouteReport(true);
+            if (s == null || s.isEmpty()) {
+                main.post(() -> Toasts.throttled(app, "정류장 정보가 없습니다"));
+                return;
+            }
 
-        // 위치 구독 시작
-        startLocationUpdates();
+            // 런타임 상태 갱신
+            stops = s;
+            index = 0;
 
-        state = State.RUNNING;
-        runningLive.postValue(true);
-        if (callbacks != null) callbacks.onAutoStart();
+            // 네트워크/로케이션/LiveData/콜백 등은 메인 스레드로
+            main.post(() -> {
+                sendRouteReport(true);
+                startLocationUpdates();
+
+                state = State.RUNNING;
+                runningLive.setValue(true); // 메인에서 setValue
+
+                if (callbacks != null) callbacks.onAutoStart();
+            });
+        });
     }
 
     @SuppressLint("MissingPermission")
@@ -200,45 +220,59 @@ public class DriveController {
                 (Build.VERSION.SDK_INT >= 28) ? app.getMainLooper() : android.os.Looper.getMainLooper());
     }
 
+    private Event currentState = DEPART;
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override public void onLocationResult(@NonNull LocationResult result) {
             Location loc = result.getLastLocation();
             if (loc == null) return;
             if (state != State.RUNNING) return;
             if (stops == null || stops.isEmpty()) return;
-            if (cursor < 0 || cursor >= stops.size()) return;
+            if (index < 0 || index >= stops.size()) return;
 
-            BusStop target = stops.get(cursor);
-            StopEngine.Radii radii = StopEngine.radiiOf(target);
-            StopEngine.Event ev = StopEngine.judge(loc.getLatitude(), loc.getLongitude(), target, radii);
-            if (ev == StopEngine.Event.NONE) return;
+            BusStop target = stops.get(index);
 
-            // 위치 보고
-            sendLocationEvent(ev, target);
+            double distance = Geomath.distanceMeters(loc.getLatitude(), loc.getLongitude(), target.latitude, target.longitude);
+            // judge logic
+            switch(currentState){
+                case DEPART:
+                    if(distance <= target.approach){
+                        currentState = Event.APPROACH;
+                        AnnounceManager am = AnnounceManager.getInstance(app);
+                        boolean hasNext = (index + 1 < stops.size());
+                        String curr = target.stopName;
+                        String next = hasNext ? stops.get(index + 1).stopName : null;
+                        if (hasNext) am.typeA(curr, next);      // normal stop
+                        else         am.typeB(curr);            // terminal stop
 
-            // TTS: Approach에서만
-            if (ev == StopEngine.Event.APPROACH) {
-                AnnounceManager am = AnnounceManager.getInstance(app);
-                boolean hasNext = (cursor + 1 < stops.size());
-                String curr = target.stopName;
-                String next = hasNext ? stops.get(cursor + 1).stopName : null;
-                if (hasNext) am.typeA(curr, next);
-                else         am.typeB(curr);
+                        sendLocationEvent(currentState, target);
+                    }
+                    break;
+                case APPROACH:
+                    if(distance <= target.arrival){
+                        currentState = Event.ARRIVE;
+                        sendLocationEvent(currentState, target);
+
+                        // is Terminal?
+                        boolean atLast = (index == stops.size() - 1);
+                        if (atLast) {
+                            reachTerminal();
+                        }
+                    }
+                    break;
+                case ARRIVE:
+                    if(distance >= target.depart){
+                        currentState = DEPART;
+
+                        index++;
+                        OperationFragment.increaseIdx();
+                        if (index >= stops.size()) index = stops.size() - 1; // safety
+
+                        sendLocationEvent(currentState, target);
+                    }
+                    break;
             }
 
-            // Depart에서 커서 이동
-            if (ev == StopEngine.Event.DEPART) {
-                cursor++;
-                if (cursor >= stops.size()) cursor = stops.size() - 1; // safety
-            }
-
-            // 종점 도달: 마지막 정류장에서 Arrive가 발생하면 종료
-            boolean atLast = (cursor == stops.size() - 1);
-            if (atLast && ev == StopEngine.Event.ARRIVE) {
-                reachTerminal();
-            }
-
-            if (callbacks != null) callbacks.onLocationEvent(ev);
+            if (callbacks != null) callbacks.onLocationEvent(currentState);
         }
     };
 
@@ -264,7 +298,7 @@ public class DriveController {
         postWithRetry(() -> api.routeStart(r), () -> api.routeTerminate(r), flag ? "routeStart" : "routeTerminate");
     }
 
-    private void sendLocationEvent(StopEngine.Event ev, BusStop target) {
+    private void sendLocationEvent(Event ev, BusStop target) {
         String status;
         switch (ev) {
             case APPROACH: status = "Approach"; break;
@@ -305,7 +339,7 @@ public class DriveController {
                 }
                 private void retry() {
                     if (attempt >= RETRY_MAX) {
-                        Toasts.throttled(app, "보고 실패: " + tag);
+                        main.post(() -> Toasts.throttled(app, "보고 실패: " + tag));
                         return;
                     }
                     sched.schedule(() -> attempt(factory, tag, attempt + 1),
@@ -314,7 +348,7 @@ public class DriveController {
             });
         } catch (Exception ex) {
             if (attempt >= RETRY_MAX) {
-                Toasts.throttled(app, "보고 예외: " + tag + " / " + ex.getMessage());
+                main.post(() -> Toasts.throttled(app, "보고 예외: " + tag + " / " + ex.getMessage()));
             } else {
                 sched.schedule(() -> attempt(factory, tag, attempt + 1),
                         RETRY_DELAY_SEC, TimeUnit.SECONDS);

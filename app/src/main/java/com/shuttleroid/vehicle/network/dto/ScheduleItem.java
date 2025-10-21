@@ -8,4 +8,13 @@ public class ScheduleItem {
     @SerializedName("routeID") public Long routeID;       // "102" / "192"
     @SerializedName("departureTime") public String departureTime; // "HH:mm"
 
+    public Long getRouteID() {
+        return routeID;
+    }
+
+    public String getDepartTime() {
+        return departureTime;
+    }
 }
+
+
